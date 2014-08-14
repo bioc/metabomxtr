@@ -1,0 +1,173 @@
+%\VignetteIndexEntry{metabomxtr} 
+%\VignetteDepends{xtable}
+\documentclass[10pt]{article}
+\usepackage{Sweave}
+\textwidth=7.5in
+\textheight=11in
+\topmargin=-0.5in
+\footskip=-2in
+
+\oddsidemargin=-0.5in
+\evensidemargin=-0.5in
+
+
+\title{An Introduction to the \textit{metabomxtr} package}
+\author{Michael Nodzenski, Anna C. Reisetter, Denise M. Scholtens}
+\date{\today}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+
+\maketitle
+
+
+\section{Introduction}
+
+High-throughput metabolomics profiling has surged in popularity, but the frequent occurrence of missing data remains a common challenge to analyzing non-targeted output. In practice, complete case analysis, imputation, and adaptations of classic dimension reduction tools to allow for missing data have been used. A more elegant approach for metabolite-by-metabolite analysis is the Bernoulli/lognormal mixture-model proposed by Moulton and Halsey (1995), which simultaneously estimates parameters modeling the probability of non-missing response and the mean of observed values. The \textit{metabomxtr} package has been developed to automate the process of mixture model analysis. 
+
+
+\section{Sample Mixture Model Analysis}
+
+The following commands demonstrate typical usage of \textit{metabomxtr}. First, load the package. 
+
+<<>>=
+  library(metabomxtr)
+@ 
+  
+  Next, load metabdata, the sample dataset. Metabdata contains metabolite levels and phenotype data of 115 of pregnant women. Columns 1:10 contain phenotype data and columns 11:59 contain log transformed metabolite levels, with missing values indicated by NA. Users should note that while metabdata is a data frame, \textit{metabomxtr} can also accommodate matrix and \textit{ExpressionSet} objects, and the function use is the same. For \textit{ExpressionSets}, metabolites should be in rows of the \textit{exprs} section, and phenotype data in columns of the \textit{pData} section. 
+
+<<>>=
+  data(metabdata)
+dim(metabdata)
+@ 
+  
+  For this analysis,  malonic acid, ribose, phenylalanine, and pyruvic acid are the metabolites of interest. These variables are in columns 24:27 of the dataset. We'll define a character vector of the corresponding column names for use later on, and check the number of missing values in each column.
+
+<<>>=
+  yvars<-colnames(metabdata)[24:27]
+apply(metabdata[,yvars],2,function(x){sum(is.na(x))})
+@ 
+  
+ We'll also check the distributions of the metabolites.
+
+<<fig=TRUE>>=
+  par(mfrow = c(2, 2))
+hist(metabdata$malonic.acid,main="Malonic Acid",xlab=NULL)
+hist(metabdata$ribose,main="Ribose",xlab=NULL)
+hist(metabdata$phenylalanine,main="Phenylalanine",xlab=NULL)
+hist(metabdata$pyruvic.acid,main="Pyruvic Acid",xlab=NULL)
+@ 
+
+Each of the metabolites contains missing values and the data look fairly normal, so mixture model analysis seems appropriate. 
+  
+\vspace{10pt}
+  
+  The woman's phenotype (variable PHENO) will be the predictor of interest. This variable indicates whether the woman had high (MomHighFPG) or low (MomLowFPG) fasting plasma glucose measurements. Our goal  is to determine if women with high FPG have significantly different metabolite levels than women with low FPG. To do this, we need to set the MomLowFPG group as the reference level of PHENO. 
+
+<<>>=
+levels(metabdata$PHENO)
+metabdata$PHENO<-relevel(metabdata$PHENO,ref="MomLowFPG")
+@ 
+
+Also, determine how many subjects are in each group. 
+
+<<>>=
+table(metabdata$PHENO)
+@ 
+
+\clearpage
+ Next, we need to specify the full mixture model. This should be of the form $\sim$ x1+x2...|z1+z2..., where x's represent covariates modeling metabolite presence/absence (discrete portion), and z's are covariates modeling the mean of observed values (continuous portion). The predictor of interest should be included in both the discrete and continuous portions of the full model. In addition, we'll control for the woman's age, gestational age, sample storage time, and parity in the continuous portion. 
+<<>>=
+fullModel<-~PHENO|PHENO+age_ogtt_mc+ga_ogtt_wks_mc+storageTimesYears_mc+parity12
+@
+
+The \textit{mxtrmod} function can then be used to run the full model on each of the 4 metabolites of interest. 
+
+<<>>=
+fullModelResults<-mxtrmod(ynames=yvars,mxtrModel=fullModel,data=metabdata)
+fullModelResults
+@ 
+
+In the output data frame, the .id column indicates metabolite, columns beginning with x's are parameter estimates for the discrete portion of the model, columns beginning with z's are parameter estimates for the continuous portion, sigma is the variance of observed values, method is the optimization algorithm used, conv indicates whether the model converged (0=convergence), negLL is the negative log likelihood, and nObs is the number of observations used. 
+
+\vspace{10pt}
+
+After running the full model, we need to specify a reduced model. Because our goal is to evaluate the significance of the contribution of phenotype to \textit{both} the continuous and discrete portions of the mixture model, we'll remove PHENO from both portions. 
+
+<<>>=
+reducedModel<-~1|age_ogtt_mc+ga_ogtt_wks_mc+storageTimesYears_mc+parity12
+@ 
+
+Then, we'll use \textit{mxtrmod} to run the reduced models. Users should note the importance of specifying the \textit{fullModel} parameter when running reduced models, which ensures that if model covariates have missing values, both full and reduced model results are based on the same set of observations. 
+
+<<>>=
+reducedModelResults<-mxtrmod(ynames=yvars,mxtrModel=reducedModel,data=metabdata,fullModel=fullModel)
+reducedModelResults
+@ 
+
+\clearpage
+
+Finally, the significance of full vs. reduced models can be examined using nested likelihood ratio $\chi^2$ tests via the \textit{mxtrmodLRT} function. Required parameters include the output data frames from \textit{mxtrmod} for full (parameter \textit{fullmod}) and reduced models (parameter \textit{redmod}). Optionally, the user may use the \textit{adj} parameter to specify method of adjustment for multiple testing.  
+
+<<>>=
+finalResult<-mxtrmodLRT(fullmod=fullModelResults,redmod=reducedModelResults,adj="BH")
+finalResult
+@
+
+
+<<echo=FALSE>>=
+pa.pval<-round(finalResult[finalResult$.id=="pyruvic.acid","adjP"],digits=4)
+@
+
+
+Similar to \textit{mxtrmod} output, .id indicates metabolite, negLLFull is the negative log likelihood of the full model, negLLRed is the negative log likelihood of the reduced model, chisq is the test statistic, df are the degrees of freedom, p is the unadjusted p-value, and adjP is the adjusted p-value. Based on the FDR adjusted p-values, pyruvic acid levels are significantly different in women with high compared to low fasting plasma glucose (p=\Sexpr{pa.pval}). Levels of the other three metabolites did not vary significantly between FPG groups. 
+
+\vspace{10pt}
+
+As a last step, we'll put together a results table. First, calculate the estimated proportion of metabolites present for high and low FPG women.  
+
+<<>>=
+HighFPG.Prop<-round(exp(fullModelResults$xInt+fullModelResults$x_PHENOMomHighFPG)/
+(1+exp(fullModelResults$xInt+fullModelResults$x_PHENOMomHighFPG)),digits=2)
+LowFPG.Prop<-round(exp(fullModelResults$xInt)/(1+exp(fullModelResults$xInt)),digits=2)
+@
+
+Next, calculate the estimated mean metabolite levels by FPG status, and estimated mean difference. 
+
+<<>>=
+HighFPG.Mean<-round(fullModelResults$zInt+fullModelResults$z_PHENOMomHighFPG,digits=2)
+LowFPG.Mean<-round(fullModelResults$zInt,digits=2)
+FPG.MeanDiff<-round(fullModelResults$z_PHENOMomHighFPG,digits=2)
+@
+
+Then combine with metabolite names and FDR adjusted p-values.  
+
+<<>>=
+finalResultTable<-data.frame(Metabolite=fullModelResults$.id,HighFPG.Prop=HighFPG.Prop,
+LowFPG.Prop=LowFPG.Prop,HighFPG.Mean=HighFPG.Mean,
+LowFPG.Mean=LowFPG.Mean,Mean.Difference=FPG.MeanDiff,
+FDR.Adj.P=round(finalResult$adjP,digits=4))
+@
+
+Below are the final results. 
+
+<<dTable,echo=FALSE,results=tex>>=
+library(xtable)
+finalXTable<-xtable(finalResultTable,digits=c(0,2,2,2,2,2,2,4))
+print(finalXTable)
+@
+
+\clearpage
+
+\section{Session Information}
+
+<<echo=FALSE,results=tex>>=
+toLatex(sessionInfo())
+@
+
+\section{References}
+
+Moulton LH, Halsey NA. A mixture model with detection limits for regression analyses of antibody response to vaccine. Biometrics. 1995 Dec;51(4):1570-8.
+
+\end{document}

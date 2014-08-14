@@ -1,0 +1,12 @@
+exportPattern("^[[:alpha:]]+")
+
+import(optimx)
+import(Formula)
+import(methods)
+import(Biobase)
+importFrom(plyr,ldply)
+importFrom(multtest, mt.rawp2adjp)
+
+exportMethods(yvals)
+exportMethods(zdesign)
+exportMethods(xdesign)
