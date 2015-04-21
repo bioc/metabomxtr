@@ -1,7 +1,7 @@
 \name{mxtrmodLRT}
 \alias{mxtrmodLRT}
 \title{
-A function to run likelihood ratio tests on full vs. reduced mixture models.
+A function to run likelihood ratio tests on full vs. reduced mixture models
 }
 \description{
 This function runs likelihood ratio tests on full vs. reduced mixture models. Input arguments are data frame outputs from the mxtrmod function.  

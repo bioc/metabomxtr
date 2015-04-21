@@ -1,7 +1,7 @@
 \name{mxtrmodLL}
 \alias{mxtrmodLL}
 \title{
-A function to return the negative log-likelihood of mixture models of truncated, normal or lognormal data. 
+A function to return the negative log-likelihood of mixture models of truncated, normal or lognormal data 
 }
 \description{
 This function returns the negative log-likelihood of the specified mixture model. 

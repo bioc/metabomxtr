@@ -1,7 +1,7 @@
 \name{mxtrmod}
 \alias{mxtrmod}
 \title{
-A function to return optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data. 
+A function to return optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data 
 }
 \description{
 This function returns optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data. 

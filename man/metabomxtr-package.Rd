@@ -3,7 +3,7 @@
 \alias{metabomxtr}
 \docType{package}
 \title{
-A package to run mixture models on truncated normal or lognormal data. 
+A package to run mixture models on truncated normal or lognormal data 
 }
 \description{
 The functions in this package return optimized parameter estimates and negative log-likelihoods for mixture models of truncated normal or lognormal data. 
@@ -12,8 +12,8 @@ The functions in this package return optimized parameter estimates and negative 
 \tabular{ll}{
 Package: \tab metabomxtr\cr
 Type: \tab Package\cr
-Version: \tab 0.99.1\cr
-Date: \tab 2014-07-12\cr
+Version: \tab 1.0.1\cr
+Date: \tab 2015-04-20\cr
 License: \tab GPL-2\cr
 }
 The function mxtrmodLL calculates the negative log-likelihood of mixture models. The function mxtrmodstart returns starting parameter estimates to be used when optimizing the mixture model parameters. The function mxtrmod returns optimized mixture model parameter estimates and the negative log-likelihood of the model. The function mxtrmodLRT performs likelihood ratio tests of full vs. reduced mixture models.

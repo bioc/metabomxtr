@@ -2,7 +2,7 @@
 \alias{metabdata}
 \docType{data}
 \title{
-A sample data set of truncated metabolomics data. 
+A sample data set of truncated metabolomics data
 }
 \description{
 This data set contains log transformed metabolite levels and phenotype data of sample 115 of pregnant women. Metabolite levels are contained in columns 11-59, and missing values are indicated by NA. All metabolites included contain at least 5 missing values. Columns 1:10 represent phenotypic data.  
