@@ -1,7 +1,7 @@
 \name{mxtrmodstart}
 \alias{mxtrmodstart}
 \title{
-A function to generate starting parameter estimates for the optimization of mixture model parameters.
+A function to generate starting parameter estimates for the optimization of mixture model parameters
 }
 \description{
 This function returns starting parameter estimates for the optimization of the mixture model parameters. The intercept of the continuous portion is set to the mean of the observed responses and the intercept of the discrete portion is set to the log odds of having observed a response. All other parameter starting values are set to zero. 
