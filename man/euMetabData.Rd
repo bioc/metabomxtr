@@ -2,7 +2,7 @@
 \alias{euMetabData}
 \docType{data}
 \title{
-A sample data set of truncated metabolomics data
+A sample data set of truncated metabolomics data.
 }
 \description{
 This data set contains a subset of non-targeted GC/MS data for mother / baby pairs of Northern European ancestry who participated in the Hyperglycemia and Adverse Pregnancy Outcome (HAPO) Metabolomics study. 
