@@ -1,7 +1,7 @@
 \name{mxtrnorm}
 \alias{mxtrnorm}
 \title{
-A function to perform per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired
+A function to perform per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
 \description{
 This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
