@@ -1,4 +1,4 @@
-#This is a function to perform per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired
+#This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired
 
 mxtrnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,correctSampleType=TRUE,sampleType=NULL,nNA=5,minProp=0.2,method="BFGS",cData,data){
   
