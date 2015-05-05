@@ -1,6 +1,6 @@
 #This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired
 
-mxtrnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,correctSampleType=TRUE,sampleType=NULL,nNA=5,minProp=0.2,method="BFGS",cData,data){
+mixnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,correctSampleType=TRUE,sampleType=NULL,nNA=5,minProp=0.2,method="BFGS",cData,data){
   
   #Make sure batches are coded as factors with the same levels
   stopifnot(all(levels(cData[,batch])==levels(data[,batch])))
