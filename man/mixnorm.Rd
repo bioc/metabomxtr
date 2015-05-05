@@ -1,5 +1,5 @@
-\name{mxtrnorm}
-\alias{mxtrnorm}
+\name{mixnorm}
+\alias{mixnorm}
 \title{
 A function to perform per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
@@ -7,7 +7,7 @@ A function to perform per-metabolite batch normalization using a mixture model w
 This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
 \usage{
-mxtrnorm(ynames, batch = "Batch", mxtrModel = NULL, batchTvals = NULL, correctSampleType = TRUE, sampleType = NULL, nNA = 5, minProp = 0.2, method = "BFGS", cData, data)
+mixnorm(ynames, batch = "Batch", mxtrModel = NULL, batchTvals = NULL, correctSampleType = TRUE, sampleType = NULL, nNA = 5, minProp = 0.2, method = "BFGS", cData, data)
 }
 \arguments{
   \item{ynames}{
@@ -45,7 +45,7 @@ The input data object for observed values to be normalized (i.e. not controls). 
 }
 }
 \details{
-This mxtrnorm function adapts the mxtrmod function in a normalization context in which aliquots from one or more control samples are run with each batch in a series of non-targeted metabolomics assays.   The function accepts a data frame of log2 peak areas from control samples and a separate data frame of log2 peak areas from samples of analytical interest.  
+This function adapts the mxtrmod function in a normalization context in which aliquots from one or more control samples are run with each batch in a series of non-targeted metabolomics assays. The function accepts a data frame of log2 peak areas from control samples and a separate data frame of log2 peak areas from samples of analytical interest.  
 }
 \value{
 Returns a list with the following components:
@@ -66,7 +66,7 @@ data(euMetabData)
 ynames <- c("betahydroxybutyrate","pyruvic_acid","malonic_acid","aspartic_acid")
 
 #in this example, batch minima specified in batchTvals were calculated from the full data set for this experiment that is not available here
-euMetabNorm <- mxtrnorm(ynames,
+euMetabNorm <- mixnorm(ynames,
                         batch="batch",
                         mxtrModel=~pheno+batch|pheno+batch,
                         batchTvals=c(10.76,11.51,11.36,10.31,11.90),
