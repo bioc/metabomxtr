@@ -7,26 +7,23 @@ A function to perform per-metabolite batch normalization using a mixture model w
 This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
 \usage{
-mixnorm(ynames, batch = "Batch", mxtrModel = NULL, batchTvals = NULL, correctSampleType = TRUE, sampleType = NULL, nNA = 5, minProp = 0.2, method = "BFGS", cData, data)
+mixnorm(ynames, batch = "Batch", mxtrModel = NULL, batchTvals = NULL, removeCorrection=NULL, nNA = 5, minProp = 0.2, method = "BFGS", cData, data)
 }
 \arguments{
   \item{ynames}{
 A character vector of the mixture model outcome names, e.g. metabolites. If the input data object is a matrix or data frame, these should be column names. If the input data object is an expression set, these should be row names. Response variables should have a normal or lognormal distribution. If lognormal,log transformed variables should be input. Missing values should be denoted by NA.
 }
   \item{batch}{
-A character value indicating the name of the variable in cData and data that indicates batch.
+A character value indicating the name of the variable in cData and data that indicates batch. If not specified, this argument defaults to "Batch"'.
 }
   \item{mxtrModel}{
-A formula of the form ~x1+x2...|z1+z2..., where x's are the names of covariates included in the discrete portion of the model and z's are names of covariates included in the continuous portion. For intercept only models, enter 1 instead of covariate names on the appropriate side of the |. The covariate names must be the same for cData and data.  The default model includes a variable 'batch' for both discrete and continuous model components.
+A formula of the form ~x1+x2...|z1+z2..., where x's are the names of covariates included in the discrete portion of the model and z's are names of covariates included in the continuous portion. For intercept only models, enter 1 instead of covariate names on the appropriate side of the |. The covariate names must be the same for cData and data.  The default model includes a variable specified in argument 'batch' for both discrete and continuous model components. Models with covariates containing missing values will not run. See documentation for mxtrmod for additional details. 
 }
   \item{batchTvals}{
 A vector, the length of batch, of thresholds below which continuous variables are not observable. The default is the minimum across all response variables (metabolites) in a given batch.
 }
-  \item{correctSampleType}{
-By default, when there are control samples of different types, normalized values are returned with a location shift correction for control sample type. If correctSampleType=FALSE, then normalized values will be returned without this location shift correction.  In this case, sampleType must be specified and must be included in at least one portion of the mxtrModel formula. sampleType must be coded as a factor with the same levels in both cData and data.
-}
-  \item{sampleType}{
-The name of the factor variable indicating the type of control sample. The variable must be the same in both cData and data.
+  \item{removeCorrection}{
+A character vector of variable names from mxtrModel whose effects should be estimated, but not subtracted from the non-normalized data. This parameter may be useful when data sets contain control samples of different types, for instance mothers and babies. In those instances, sample type may be an important covariate with respect to accurately estimating batch effects, necessitating inclusion in the mixture model, but it may not be of interest to actually subtract the estimated sample effect from the non-normalized data. If not specified, all estimated effects from the mixture model will be subtracted from the non-normalized data.
 }
   \item{nNA}{
 The minimum number of unobserved values needed to be present for the discrete portion of the model likelihood to be calculated. Models for variables with fewer than nNA missing values will include only the continuous portion. The default value is 5.
