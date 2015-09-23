@@ -12,7 +12,7 @@ The functions in this package return optimized parameter estimates and negative 
 \tabular{ll}{
 Package: \tab metabomxtr\cr
 Type: \tab Package\cr
-Version: \tab 1.3.3\cr
+Version: \tab 1.3.4\cr
 Date: \tab 2015-09-23\cr
 License: \tab GPL-2\cr
 }
@@ -29,6 +29,8 @@ Moulton LH, Halsey NA. A mixture model with detection limits for regression anal
 
 \keyword{ package }
 \examples{
+###Run mixture model analyses
+
 #Create sample data
 set.seed(123)
 yvar<-rlnorm(200)
@@ -61,6 +63,25 @@ redModRes
 
 #Compare models using likelihood ratio test
 mxtrmodLRT(fullModRes,redModRes)
+
+###Perform mixture model normalization
+
+#load control data set 
+data(euMetabCData)
+
+#load experimental data 
+data(euMetabData)
+
+#specify target metabolites
+ynames <- c("betahydroxybutyrate","pyruvic_acid","malonic_acid","aspartic_acid")
+
+#run mixture model normalization 
+euMetabNorm <- mixnorm(ynames,
+                        batch="batch",
+                        mxtrModel=~pheno+batch|pheno+batch,
+                        batchTvals=c(10.76,11.51,11.36,10.31,11.90),
+                        cData=euMetabCData,
+                        data=euMetabData)
 
 }
 
