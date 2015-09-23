@@ -1,58 +1,66 @@
 #This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired
 
-mixnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,correctSampleType=TRUE,sampleType=NULL,nNA=5,minProp=0.2,method="BFGS",cData,data){
-  
-  #Make sure batches are coded as factors with the same levels
-  stopifnot(all(levels(cData[,batch])==levels(data[,batch])))
-
- 
+mixnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,removeCorrection=NULL,nNA=5,minProp=0.2,method="BFGS",cData,data){
   
   #If not specified, indicate default mxtrModel 
   if (is.null(mxtrModel)) mxtrModel <- as.formula(paste("~",batch,"|",batch))
   mxtrModel2 <- as.Formula(mxtrModel)
 
-  #By default, when there are control samples of different types,
-  #normalized values are returned with a location shift correction for
-  #control sample type.
-  #If correctSampleType=FALSE, then normalized values will be returned without
-  #this location correct.  In this case, sampleType must be specified and must be
-  #included in at least one portion of the mxtrModel formula
-  #Also make sure sampleType is coded as a factor with the same levels
-  
-  if(!correctSampleType){
-    stopifnot(!is.null(sampleType))
-    stopifnot(sampleType %in% all.vars(mxtrModel2))
-    stopifnot(all(levels(cData[,sampleType])==levels(data[,sampleType])))
-
-    #get variable names that will be associated with controlSampleType after correction
-    sampleTypeVarNames <- paste(sampleType,levels(data[,sampleType])[-1],sep="")
-  }
+  #confirm that all variables included in the mixture model are in both data and cData, in compatible forms 
+  model.vars<-all.vars(mxtrModel2)
+  lapply(c(model.vars,removeCorrection),function(x){
+		#make sure all variables are in both data sets
+		if (!x %in% colnames(cData)){
+			stop(paste(x,"is not in cData."))
+		} 
+		if (!x %in% colnames(data)){
+			stop(paste(x,"is not in data."))
+		}
+		#make sure the variable types are compatible in both data sets 
+		cdata.type<-class(cData[,x])
+		data.type<-class(data[,x])
+		if (cdata.type!=data.type){
+			stop(paste(x,"is of type",cdata.type,"in cData but type",data.type,"in data."))
+		}		
+		#make sure levels of factor/character variables are compatible
+		if (cdata.type=="character" & data.type=="character"){
+			cdata.factor<-as.factor(cData[,x])
+			data.factor<-as.factor(data[,x])
+			if (!all(levels(cdata.factor)==levels(data.factor))){
+				stop(paste(x,"does not have the same levels in cData and data."))
+			}
+		}
+		if (cdata.type=="factor" & data.type=="factor"){
+			if (!all(levels(cData[,x])==levels(data[,x]))){
+				stop(paste(x,"does not have the same levels in cData and data."))
+			}
+		}
+		#make sure batch is coded as a factor 
+		if (x==batch){
+			if (cdata.type!="factor" | data.type!="factor"){
+				stop(paste("Batch variable",x,"must be coded as a factor."))
+			}
+		}
+		#make sure there are no missing values for the covariates in the model 
+		if (!x %in% ynames){
+			if (any(is.na(cData[,x]))){
+				stop(paste(x,"is missing values in cData. Missing values for model covariates are not permitted."))
+			}
+			if (any(is.na(data[,x]))){
+				stop(paste(x,"is missing values in data. Missing values for model covariates are not permitted."))
+			}
+		}
+	})
   
   #Define data frames containing response variables in control and observed data
   obsYc <- yvals(cData,ynames)
   obsY <- yvals(data,ynames)
-
-  #Define the design matrices for the discrete portion of the model
-  xVarsc<-xdesign(cData,mxtrModel2)
-  xVars<-xdesign(data,mxtrModel2)
-  stopifnot(dim(xVarsc)[2]==dim(xVars)[2])
   
   #Define the design matrices for the continuous portion of the model 
   zVarsc<-zdesign(cData,mxtrModel2)
   zVars<-zdesign(data,mxtrModel2)
   stopifnot(dim(zVarsc)[2]==dim(zVars)[2])
-  
-
-  #Determine if any of the observations have missing covariate values
-  #Stop normalization if any values are missing
-  stopifnot(all(apply(xVarsc,1,function(x){all(!is.na(x))})))
-  stopifnot(all(apply(xVars,1,function(x){all(!is.na(x))})))
-  stopifnot(all(apply(zVarsc,1,function(x){all(!is.na(x))})))
-  stopifnot(all(apply(zVars,1,function(x){all(!is.na(x))})))
-  
-
-
-  
+   
   #Find batch specific minima if batchTvals is not defined
   if(is.null(batchTvals)){
     cMin <- apply(obsYc,1,FUN=min,na.rm=TRUE)
@@ -80,11 +88,30 @@ mixnorm <- function(ynames,batch="Batch",mxtrModel=NULL,batchTvals=NULL,correctS
     zVarsc[,"(Intercept)"] <- rep(0,dim(zVarsc)[1])
     zVars[,"(Intercept)"] <- rep(0,dim(zVars)[1])
   }
-  if(!correctSampleType){
-    zVarsc[,sampleTypeVarNames] <- 0
-    zVars[,sampleTypeVarNames] <- 0
+
+  #By default, the effects of all variables included in the mixture model 
+  #will be subtracted from the non-normalized data. However, if desired, 
+  #variables specified via removeCorrection can be included in the mixture 
+  #model as covariates, but their estimated effects will not be subtracted 
+  #from the raw data. 
+  if(!is.null(removeCorrection)){
+	#get names of variables to remove 
+	remove.these<-unlist(lapply(removeCorrection,function(x){
+							#make sure removeCorrection variables are in the mixture model
+							if (! x %in% model.vars){
+								stop(paste(x,"is specified in removeCorrection but is not included in the mixture model."))
+							}
+							#then identify the names of the variables in the mixture model output normParams
+							varname<-paste(x,levels(as.factor(data[,x]))[-1],sep="")
+							return(varname)
+					}))
+
+	#then set effects to zero 
+	zVarsc[,remove.these] <- 0
+	zVars[,remove.these] <- 0
   }
-     
+   
+  #Determine correction values   
   corrValc <- zVarsc %*% t(normParamsZ)
   corrVal <- zVars %*% t(normParamsZ)
 
