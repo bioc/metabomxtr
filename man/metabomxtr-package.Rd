@@ -12,7 +12,7 @@ The functions in this package return optimized parameter estimates and negative 
 \tabular{ll}{
 Package: \tab metabomxtr\cr
 Type: \tab Package\cr
-Version: \tab 1.3.5\cr
+Version: \tab 1.3.6\cr
 Date: \tab 2015-09-23\cr
 License: \tab GPL-2\cr
 }

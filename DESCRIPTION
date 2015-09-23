@@ -2,13 +2,13 @@ Package: metabomxtr
 Type: Package
 Title: A package to run mixture models for truncated metabolomics data
         with normal or lognormal distributions
-Version: 1.3.5
+Version: 1.3.6
 Date: 2015-09-23
 Author: Michael Nodzenski, Anna Reisetter, Denise Scholtens
 Maintainer: Michael Nodzenski <michael.nodzenski@northwestern.edu>
 Depends: methods,Biobase
 Imports: optimx, Formula, plyr, multtest
-Suggests: xtable
+Suggests: xtable, ggplot2, reshape2
 Description: The functions in this package return optimized parameter
         estimates and log likelihoods for mixture models of truncated
         data with normal or lognormal distributions.
