@@ -4,7 +4,7 @@ import(optimx)
 import(Formula)
 import(methods)
 import(Biobase)
-importFrom(plyr,ldply)
+importFrom(plyr, ldply, rbind.fill)
 importFrom(multtest, mt.rawp2adjp)
 
 exportMethods(yvals)
