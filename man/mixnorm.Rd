@@ -7,7 +7,7 @@ A function to perform per-metabolite batch normalization using a mixture model w
 This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
 \usage{
-mixnorm(ynames, batch = "Batch", mxtrModel = NULL, batchTvals = NULL, removeCorrection=NULL, nNA = 5, minProp = 0.2, method = "BFGS", cData, data)
+mixnorm(ynames, batch = "Batch", mxtrModel=NULL, cData, data, batchTvals = NULL, removeCorrection=NULL, nNA = 5, minProp = 0.2, method = "BFGS")
 }
 \arguments{
   \item{ynames}{
@@ -35,10 +35,10 @@ The minimum proportion of non-missing data in the response variable necessary to
 The method used to optimize the parameter estimates of the mixture model. "BFGS" is the default method. Other options are documented in the manual for the function 'optimx' in package optimx.
 }
   \item{cData}{
-The input data object of control data to estimate normalization parameters. Matrices, data frames, and expression sets are all acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
+The input data object of control data to estimate normalization parameters. Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
 }
   \item{data}{
-The input data object for observed values to be normalized (i.e. not controls). Matrices, data frames, and expression sets are all acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
+The input data object for observed values to be normalized (i.e. not controls). Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
 }
 }
 \details{
@@ -46,9 +46,10 @@ This function adapts the mxtrmod function in a normalization context in which al
 }
 \value{
 Returns a list with the following components:
-\item{normParamsZ}{A data frame of the per-metabolite parameter estimates from the mixture model that are subtracted from the observed values to created the normalized data set.}
+\item{normParamsZ}{A data frame of the per-metabolite parameter estimates from the mixture model that are subtracted from the observed values to created the normalized data set. If  a parameter estimated is NA, that parameter level was used as the reference. This occurs when the outcome (metabolite) values are completely missing for a particular level of a categorical variable, and the specific missing level can be found in the conv element of the function outcome.}
 \item{ctlNorm}{A data frame of normalized values for the control samples.}
 \item{obsNorm}{A data frame of normalized values for the samples of analytical interest.}
+\item{conv}{A data frame indicating whether models converged (indicated by a 0). This also indicates whether there were levels of categorical predictors excluded from normalization in column missing_levels_warning. If that column is not present, then there were no missing levels.  }
 }
 \references{
 Nodzenski M, Muehlbauer MJ, Bain JR, Reisetter AC, Lowe WL Jr, Scholtens DM. Metabomxtr: an R package for mixture-model analysis of non-targeted metabolomics data. Bioinformatics. 2014 Nov 15;30(22):3287-8.
