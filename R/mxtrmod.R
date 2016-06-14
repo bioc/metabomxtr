@@ -1,4 +1,5 @@
 mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",data,fullModel=NULL){
+
   ###############################################################################################
   # Determines optimized estimates for all parameters in a mixture model.  
   #
@@ -34,7 +35,7 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
   #            of covariates included in the continuous portion. Input if the mxtrModel parameter
   #            represents a reduced model. 
   #  checkMissing: Should factor/character variables in the input mixture model be checked to determine 
-  #				   if sufficient data exists to estimate their effects? Defualts to TRUE. 
+  #				   if sufficient data exists to estimate their effects? Defaults to TRUE. 
   # Returns:
   #   A data frame with optimized estimates for all parameters in the mixture model, the negative 
   #   log likelihood, the optimization method used, whether the algorithm converged, and the 
@@ -148,3 +149,4 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
   return(final.result)
   
  }
+
