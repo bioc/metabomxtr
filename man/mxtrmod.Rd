@@ -4,7 +4,7 @@
 A function to return optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data 
 }
 \description{
-This function returns optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data. 
+This function returns optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data, via call to function runMxtrmod, after properly accounting for factor variable predictors with entirely missing outcome data. 
 }
 \usage{
 mxtrmod(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",data,fullModel=NULL)
