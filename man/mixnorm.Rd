@@ -7,7 +7,7 @@ A function to perform per-metabolite batch normalization using a mixture model w
 This function performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
 }
 \usage{
-mixnorm(ynames, batch = "Batch", mxtrModel=NULL, cData, data, batchTvals = NULL, removeCorrection=NULL, nNA = 5, minProp = 0.2, method = "BFGS")
+mixnorm(ynames, batch = "Batch", mxtrModel=NULL, cData, data, batchTvals = NULL, removeCorrection=NULL, nNA = 5, minProp = 0.2, method = "BFGS", qc.sd.outliers=2 )
 }
 \arguments{
   \item{ynames}{
@@ -19,8 +19,14 @@ A character value indicating the name of the variable in cData and data that ind
   \item{mxtrModel}{
 A formula of the form ~x1+x2...|z1+z2..., where x's are the names of covariates included in the discrete portion of the model and z's are names of covariates included in the continuous portion. For intercept only models, enter 1 instead of covariate names on the appropriate side of the |. The covariate names must be the same for cData and data.  The default model includes a variable specified in argument 'batch' for both discrete and continuous model components. Models with covariates containing missing values will not run. See documentation for mxtrmod for additional details. 
 }
+  \item{cData}{
+The input data object of control data to estimate normalization parameters. Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
+}
+  \item{data}{
+The input data object for observed values to be normalized (i.e. not controls). Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
+}
   \item{batchTvals}{
-A vector, the length of batch, of thresholds below which continuous variables are not observable. The default is the minimum across all response variables (metabolites) in a given batch.
+A vector of thresholds below which continuous variables are not observable. If specifying this argument, it must be the length of the unique levels of batch, with the thresholds in the same order that batch levels appear in cData. For instance, if there are 5 batches in cData, and they appear in order from 1 to 5, then argument batchTvals would need to be a numeric vector of length 5 with batch specific thresholds specified in that order. The default is the minimum across all response variables (metabolites) for each batch. ***Note that this default behavior may yield different normalization results for the same metabolite depending on the other metabolites entered as part of argument ynames. This should not be a concern if using all metabolite names as part of the ynames argument***. If running normalization on a subset of the full list of metabolites, to get the same results as the full set, the user should manually enter the minimum observed abundance across metabolites for each batch. 
 }
   \item{removeCorrection}{
 A character vector of variable names from mxtrModel whose effects should be estimated, but not subtracted from the non-normalized data. This parameter may be useful when data sets contain control samples of different types, for instance mothers and babies. In those instances, sample type may be an important covariate with respect to accurately estimating batch effects, necessitating inclusion in the mixture model, but it may not be of interest to actually subtract the estimated sample effect from the non-normalized data. If not specified, all estimated effects from the mixture model will be subtracted from the non-normalized data.
@@ -34,11 +40,8 @@ The minimum proportion of non-missing data in the response variable necessary to
   \item{method}{
 The method used to optimize the parameter estimates of the mixture model. "BFGS" is the default method. Other options are documented in the manual for the function 'optimx' in package optimx.
 }
-  \item{cData}{
-The input data object of control data to estimate normalization parameters. Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
-}
-  \item{data}{
-The input data object for observed values to be normalized (i.e. not controls). Matrices, data frames, and expression sets are acceptable classes. If a data frame or matrix, rows are subjects and columns are metabolites or outcomes.
+  \item{qc.sd.outliers}{
+The maximum number of standard deviations from the mean that should be considered non-outlying metabolite abundance values for the control data. Metabolite abundances greater than this will be removed from modeling batch effects to avoid having outliers unduly influence normalization parameters. This defaults to 2 standard deviations from the mean. To not exclude outliers, enter Inf for this argument. 
 }
 }
 \details{
@@ -47,9 +50,9 @@ This function adapts the mxtrmod function in a normalization context in which al
 \value{
 Returns a list with the following components:
 \item{normParamsZ}{A data frame of the per-metabolite parameter estimates from the mixture model that are subtracted from the observed values to created the normalized data set. If  a parameter estimated is NA, that parameter level was used as the reference. This occurs when the outcome (metabolite) values are completely missing for a particular level of a categorical variable, and the specific missing level can be found in the conv element of the function outcome.}
-\item{ctlNorm}{A data frame of normalized values for the control samples.}
-\item{obsNorm}{A data frame of normalized values for the samples of analytical interest.}
-\item{conv}{A data frame indicating whether models converged (indicated by a 0). This also indicates whether there were levels of categorical predictors excluded from normalization in column missing_levels_warning. If that column is not present, then there were no missing levels.  }
+\item{ctlNorm}{A data frame of normalized values for the control samples. Observations that were NA in the input data will remain NA, but observations considered outliers based on argument qc.sd.outliers  will not be normalized and instead coded as Inf.}
+\item{obsNorm}{A data frame of normalized values for the samples of analytical interest. Observations that were NA in the input data will remain NA, but observations that could not be normalized due to too much missing quality control data, or too many outlying values in the quality control data, will not be normalized and instead coded Inf. This may occur if there is not enough data to estimated a specific batch effect (i.e., the effect of one out of 5 batches could not be estimated) or if there is not enough data to estimate the effect of a categorical predictor (i.e., if there is only QC data present for maternal samples, we can't estimate the effect relative to baby samples). }
+\item{conv}{A data frame indicating whether models converged (indicated by a 0). This also indicates whether any categorical predictor levels were not modeled, and whether any categorical predictors were omitted from the model entirely. Specific levels of categorical predictors will be excluded from models when quality control metabolite data are entirely missing for that level. These variables and corresponding levels are reported in column "predictors_missing_levels". Categorical variables will be completely removed from models when quality control metabolite values are missing entirely or present for only one level of a categorical variable. These omitted variables are reported in column "excluded_predictors". Both columns indicate variables, or specific levels of variables, whose effects could not be accounted for in normalization. Normalized values will therefore not be output for metabolites with these warnings. For example, if metabolites were assayed in 20 total batches, and quality control data were completely missing for batch 2,  the effect of batch 2 cannot be estimated but the effects of the other 19 batches can and will be estimated. In the normalized data, non-missing metabolite values in batch 2 will be re-coded as Inf, but the correction will be made for the remaining batches. If columns predictors_missing_levels and excluded_predictors are not present, then no exclusions were made.}
 }
 \references{
 Nodzenski M, Muehlbauer MJ, Bain JR, Reisetter AC, Lowe WL Jr, Scholtens DM. Metabomxtr: an R package for mixture-model analysis of non-targeted metabolomics data. Bioinformatics. 2014 Nov 15;30(22):3287-8.

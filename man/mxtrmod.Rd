@@ -7,7 +7,7 @@ A function to return optimized parameter estimates and the negative log-likeliho
 This function returns optimized parameter estimates and the negative log-likelihood of mixture models for truncated normal or lognormal data, via call to function runMxtrmod, after properly accounting for factor variable predictors with entirely missing outcome data. 
 }
 \usage{
-mxtrmod(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",data,fullModel=NULL)
+mxtrmod(ynames, mxtrModel, Tvals=NULL, nNA=5, minProp=0.2, method="BFGS", data, fullModel=NULL, remove.outlier.sd=NULL)
 }
 \arguments{
   \item{ynames}{
@@ -34,9 +34,12 @@ The input data object. Matrices, data frames, and expression sets are all accept
 \item{fullModel}{
 A formula of the form ~x1+x2...|z1+z2..., where x's are the names of covariates included in the discrete portion of the full model and z's are names of covariates included in the continuous portion. Input if the mxtrModel parameter represents a reduced model.  
 }
+\item{remove.outlier.sd}{
+The maximum number of standard deviations from the mean that should be considered non-outlying metabolite abundance values. Metabolite abundances greater than this will be removed from modeling to avoid having outliers unduly influence model parameters. This defaults to NULL, meaning all data will be used in modeling. 
+}
 }
 \value{
- Returns a data frame containing optimized estimates for all parameters in the mixture model, the negative log likelihood of the model, the optimization method used, whether the algorithm converged, and the total number of observations used. 
+ Returns a data frame containing optimized estimates for all parameters in the mixture model, the negative log likelihood of the model, the optimization method used, the total number of observations used, whether the algorithm converged, whether any categorical predictor levels were not modeled, and whether any categorical predictors were omitted from the model entirely. Specific levels of categorical predictors will be excluded from models when metabolite data are entirely missing for that level. These variables and corresponding levels are reported in column "predictors_missing_levels". Categorical variables will be completely removed from models when metabolite values are missing entirely or present for only one level of the categorical variable. These omitted variables are reported in column "excluded_predictors". If those columns are not present in the output, no predictor exclusions occured. 
 
 }
 \references{

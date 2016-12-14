@@ -1,10 +1,10 @@
 \name{anyMissingLevels}
 \alias{anyMissingLevels}
 \title{
-A function to determine whether any level of a categorical variable has completely missing outcome data 
+A function to determine whether any level of a categorical variable has completely missing outcome (metabolite) data 
 }
 \description{
-This function determines whether any level of a categorical variable has completely missing outcome data.
+This function determines whether any level of a categorical predictor variable has completely missing outcome data.
 }
 \usage{
 anyMissingLevels( yname,  cat.vars,  dataset)
@@ -21,7 +21,7 @@ A data frame containing the yname and cat.vars variables.
 }
 }
 \value{
- Returns a list of whether each of the variables specified in argument cat.vars has at least one level with completely missing values for the outcome variable specified in yname.
+ Returns a list indicating whether each of the variables specified in argument cat.vars has at least one level with completely missing values for the outcome variable specified in yname.
 
 }
 

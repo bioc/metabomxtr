@@ -68,7 +68,7 @@ pred3[pred3miss]<-NA
 testdata<-data.frame(cbind(yvar,y2var,logyvar,logy2var,pred1,pred2,pred3))
 
 #Get the names of the response variables 
-ynames<-names(testdata)[3:4]
+ynames<-names(testdata)[3]
 
 #Run a mixture model on each response variable 
 mod<-~pred1+pred2+pred3|pred1+pred2+pred3
@@ -87,19 +87,19 @@ phenoData <- new("AnnotatedDataFrame",data=exprspheno)
 #combine into example expression set 
 testexpr<-ExpressionSet(assayData=exprsobs,phenoData=phenoData)
 
-#Get the names of the response variables 
-ynames<-rownames(exprs(testexpr))
+#Get the names of the response variable
+ynames<-rownames(exprs(testexpr))[1]
 
-#Run the mixture model on each response variable 
+#Run the mixture model on the response variable 
 runMxtrmod(ynames=ynames,mxtrModel=mod,data=testexpr)
 
 #Load the data set from the package
 data(metabdata)
 
-#Select the response variables
-ynames<-names(metabdata)[11:17]
+#Select the response variable
+ynames<-names(metabdata)[11]
 
-#Run the mixture models 
+#Run the mixture models
 mod2<-~PHENO|PHENO+age_ogtt_mc+parity12+ga_ogtt_wks_mc
 runMxtrmod(ynames,mxtrModel=mod2,data=metabdata)
 }
