@@ -11,7 +11,7 @@
 \evensidemargin=-0.5in
 
 
-\title{An Introduction Mixture Model Normalization with the \textit{metabomxtr} Package}
+\title{An Introduction Mixture Model Normalization with the \texttt{metabomxtr} Package}
 \author{Michael Nodzenski, Anna C. Reisetter, Denise M. Scholtens}
 \date{\today}
 
@@ -24,18 +24,18 @@
 
 \section{Introduction}
 
-Controlling technical variability in metabolite abundance, or normalization, is a critical step in the analysis and interpretation of non-targeted gas-chromatography/mass-spectrometry (GC/MS) data. In large scale metabolomics studies requiring sample processing in many analytic batches, technical artifacts due to batch and run-order within batch are common. In these cases, repeated assays of a set of control samples may be used to estimate and account for these artifacts. The \textit{metabomxtr} package implements a mixture model normalization approach via the function \textit{mixnorm} for studies implementing this quality control measure. Based on control sample variability, \textit{mixnorm} allows for per-metabolite modeling of both batch and run-order effects, while allowing for bach specific thresholds of metabolite detectability.  
+Controlling technical variability in metabolite abundance, or normalization, is a critical step in the analysis and interpretation of non-targeted gas-chromatography/mass-spectrometry (GC/MS) data. In large scale metabolomics studies requiring sample processing in many analytic batches, technical artifacts due to batch and run-order within batch are common. In these cases, repeated assays of a set of control samples may be used to estimate and account for these artifacts. The \texttt{metabomxtr} package implements a mixture model normalization approach via the function \texttt{mixnorm} for studies implementing this quality control measure. Based on control sample variability, \texttt{mixnorm} allows for per-metabolite modeling of both batch and run-order effects, while allowing for bach specific thresholds of metabolite detectability.  
 
 
 \section{Sample Mixture Model Normalization}
 
-The following commands demonstrate typical usage of \textit{mixnorm}. First, load the package. 
+The following commands demonstrate typical usage of \texttt{mixnorm}. First, load the package. 
 
 <<>>=
   library(metabomxtr)
 @ 
   
-Next, load euMetabData, a sample data frame containing metabolite data for a total of 40 mother-baby pairs of Northern European ancestry. A total of 3 blood samples are included for each pair: mother fasting, mother 1-hour, and newborn cord blood. Mother samples were obtained during an oral glucose tolerance test (OGTT) at 28 weeks gestation, and baby samples were collected at birth. Sample types are indicated by row names, with `mf' and `m1'  indicating maternal fasting and 1-hour samples, respectively, and `bc' indicating baby samples. Note that while euMetabData is a data frame, \textit{mixnorm} also accomodates metabolite data in matrix and ExpressionSet objects.
+Next, load \texttt{euMetabData}, a sample data frame containing metabolite data for a total of 40 mother-baby pairs of Northern European ancestry. A total of 3 blood samples are included for each pair: mother fasting, mother 1-hour, and newborn cord blood. Mother samples were obtained during an oral glucose tolerance test (OGTT) at 28 weeks gestation, and baby samples were collected at birth. Sample types are indicated by row names, with `mf' and `m1'  indicating maternal fasting and 1-hour samples, respectively, and `bc' indicating baby samples. Note that while \texttt{euMetabData} is a data frame, \texttt{mixnorm} also accommodates metabolite data in matrix and ExpressionSet objects.
 
 <<>>=
  data(euMetabData)
@@ -46,7 +46,7 @@ Next, load euMetabData, a sample data frame containing metabolite data for a tot
 
 \clearpage
 
-Also load euMetabCData, a data frame containing GC/MS data from separate mom and baby control pools.  Control pool aliquots were run at the beginning, middle and end of each batch with placement indicated by -1, -2 and -3 appended to the sample name, respectively.
+Also load \texttt{euMetabCData}, a data frame containing GC/MS data from separate mom and baby control pools.  Control pool aliquots were run at the beginning, middle and end of each batch with placement indicated by -1, -2 and -3 appended to the sample name, respectively.
 
 <<>>=
 data(euMetabCData)
@@ -133,30 +133,28 @@ control.plot.final
 
 \clearpage
 
-Both mother and baby control samples show considerable variability within and across batches, including one instance where abundance fell below the detectable threshold. To account for these techinical artifacts, we will use mixture model normalization implemented in the function \textit{mixnorm}. This function takes as required arguments a character vector of target metabolite column names, the name of the variable corresponding to analytic batch in the input data objects, a data object (data frame, matrix, or ExpressionSet) with quality control data, and a data object with experimental data. In the example data sets, the variable corresponding to analytic batch is 'batch', the target metabolite columns are 'pyruvic\_acid' and 'malonic\_acid' (specified previously), the control data set is euMetabCData, and the experimental data set is euMetabData. By default, \textit{mixnorm} implements a mixture model with batch as the only covariate. For this analysis, we also want to account for sample phenotype (mother vs. baby), and can do this by specifying a mixture model formula including both batch and phenotype. Note that mixnorm will not run if mixture model covariates are missing values. Additionally, we will specify the experimentally determined thresholds of metabolite detectability in optional argument batchTvals. If not specified, the default detectable batch threshold is set to the minimum observed metabolite abundance for that batch, across all metabolites of analytic interest. 
+Both mother and baby control samples show considerable variability within and across batches, including one instance where abundance fell below the detectable threshold. To account for these technical artifacts, we will use mixture model normalization implemented in the function \texttt{mixnorm}. This function takes as required arguments a character vector of target metabolite column names, the name of the variable corresponding to analytic batch in the input data objects, a data object (data frame, matrix, or ExpressionSet) with quality control data, a data object with experimental data, and a numeric value corresponding to outlier criteria. More specifically, this numeric value indicates the maximum number of standard deviations from the mean metabolite abundance an observation may be and still be considered non-outlying. Any observations falling outside this threshold will not be used in estimating batch effects and other technical artifacts. In our experience, 2 standard deviations usually performs well, and the argument therefore defaults to 2. In the example data sets, the variable corresponding to analytic batch is 'batch', the target metabolite columns are 'pyruvic\_acid' and 'malonic\_acid' (specified previously), the control data set is  \texttt{euMetabCData}, and the experimental data set is  \texttt{euMetabData}. By default, \texttt{mixnorm} implements a mixture model with batch as the only covariate. For this analysis, we also want to account for sample phenotype (mother vs. baby), and can do this by specifying a mixture model formula including both batch and phenotype. Note that \texttt{mixnorm} will not run if mixture model covariates are missing values. Additionally, we will specify the experimentally determined thresholds of metabolite detectability in optional argument  \texttt{batchTvals}. If not specified, the default detectable batch threshold is set to the minimum observed metabolite abundance for that batch, across all metabolites of analytic interest. Note this may result in obtaining different results for the same metabolite depending on the other metabolites entered as part of argument \texttt{ynames}. Most often, this manifests when running \texttt{mixnorm} on a subset of the full metabolite group. In these cases, the user needs to manually calculate the minimum observed metabolite abundance across all metabolites of interest for each batch, and enter that vector for \texttt{batchTvals}. Because of this, in general, we recommend running \texttt{mixnorm} on the full set of metabolites of interest. 
 
 <<>>=
 #execute normalization
 euMetabNorm <- mixnorm(ynames, batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
 				batchTvals=c(10.76,11.51,11.36,10.31,11.90), cData=euMetabCData,
-				data=euMetabData)
-#this produces warnings about NaNs produced, but this is the expected behavior of the function 
+				data=euMetabData, qc.sd.outliers=2)
 @
 
-The output of \textit{mixnorm} is a list of three data frames. The first, normParamsZ, contains parameter estimates for the variables included in the mixture model for each metabolite specified. All estimates except for the intercept are subtracted from the raw metabolite values to produce the normalized data. 
+The output of \texttt{mixnorm} is a list of four data frames. The first, \texttt{normParamsZ}, contains parameter estimates for the variables included in the mixture model for each metabolite specified. All estimates except for the intercept are subtracted from the raw metabolite values to produce the normalized data. 
 
 <<>>=
 euMetabNorm$normParamsZ
 @
 
-The second element of the output list, ctlNorm, contains normalized values for the control samples.
+The second element of the output list, \texttt{ctlNorm}, contains normalized values for the control samples.
 
 <<>>=
 head(euMetabNorm$ctlNorm)
 @
 
-
-The third element of the output list, obsNorm, contains normalized values for the experimental samples. Note that when metabolite abundance falls below the detectable threshold, indicated by missing metabolite values, values will remain missing in the normalized data set.  
+The third element of the output list, \texttt{obsNorm}, contains normalized values for the experimental samples. Note that when metabolite abundance falls below the detectable threshold, indicated by missing metabolite values, values will remain missing in the normalized data set.  
 
 <<>>=
 head(euMetabNorm$obsNorm)
@@ -164,195 +162,162 @@ head(euMetabNorm$obsNorm)
 
 \clearpage
 
-After normalization, mean abundance values are much more stable across batches in the control samples:
+The fourth element of the output list, \texttt{conv}, contains information on whether models converged (indicated by a zero in the \texttt{conv} column) and whether effects for predictor variables could not be estimated. 
 
-<<echo=FALSE,results=hide>>=
-#get normalized control data in right format for plotting 
-normalized.control.data<-control.data.copy
-normalized.control.data[,ynames]<-euMetabNorm$ctlNorm[,ynames]
-normalized.control.plot.data<-melt(normalized.control.data,measure.vars=ynames,variable.name="Metabolite",value.name="Abundance")
-revalue(normalized.control.plot.data$Metabolite,c("malonic_acid"="Malonic Acid","pyruvic_acid"="Pyruvic Acid"))->normalized.control.plot.data$Metabolite
-
-#get annotation of normalized mean values for mother and baby samples 
-normalized.control.mean.annotation<-ddply(normalized.control.plot.data,c("Metabolite","pheno","batch"),summarize,Abundance=mean(Abundance,na.rm=T))
-normalized.control.mean.annotation$type<-"Batch Specific Mean"
-
-#merge on to control data 
-normalized.control.plot.data<-rbind(normalized.control.plot.data,normalized.control.mean.annotation[,c("batch","pheno","type","Metabolite","Abundance")])
-
-#impute value below the minimum detectable threshold for the 1 missing value (as above)
-normalized.control.plot.data[which(is.na(normalized.control.plot.data$Abundance)),"Abundance"]<-impute.val
+<<>>=
+head(euMetabNorm$conv)
 @
 
-<<label=fig2, echo=FALSE,include=FALSE>>=
-#beginning of plot 
-normalized.control.plot<-ggplot(normalized.control.plot.data,aes(x=batch,y=Abundance,color=pheno,shape=type,group=pheno))+
-						geom_point(size=7)+geom_line(data=normalized.control.plot.data[which(normalized.control.plot.data$type=="Batch Specific Mean"),])+
-						scale_color_discrete(name="Sample Type")+scale_shape_manual(name="Point Type",values=c(8,15,16,17))+
-						xlab("Analytic Batch")+ylab("Metabolite Abundance")+facet_wrap(~Metabolite)
-						
-#now add in line segments indicating batch specific thresholds of detectability for the first 4 batches
-batch.thresholds1.to.4<-c(10.76,11.51,11.36,10.31)
-for (x in 1:4){
-	threshold<-batch.thresholds1.to.4[x]
-	batch.lower<-x-0.3
-	batch.upper<-x+0.3
-	normalized.control.plot<-normalized.control.plot+geom_segment(x=batch.lower,y=threshold,xend=batch.upper,yend=threshold,color="purple",linetype=2)
-}
+After normalization, the function \texttt{metabplot} can be used to assess how mixture model normalization performed. The function takes as arguments a metabolite column name (which must be present in all input data frames), a character indicating the name of the batch variable, and data frames of raw (non-normalized) experimental data,  raw quality control data, normalized experimental data, and normalized quality control data. Optionally, the user can also specify a character indicating a variable to be used to group and color observations in plots. Last, the function requires numeric outlier thresholds for both the raw quality control data and the normalized experimental data. As with \texttt{mixnorm}, both arguments indicate the maximum number of standard deviations from the mean metabolite abundance considered to be non-outlying. For the argument indicating the quality control sample threshold (\texttt{cont.outlier.sd.thresh}), the same value used for \texttt{qc.sd.outliers} in \texttt{mixnorm} should be input and the argument defaults to 2. These points will be indicated in the plots as "Excluded Outliers" and are the observations that were not used in estimating batch effects. The argument indicating the normalized experimental data threshold defaults to 4. These points will appear in the normalized experimental data plot as "Potential Outliers". These observations may represent true outlying metabolite levels after control of technical variability, and the user may want to exclude these from downstream analysis (if using \texttt{mxtrmod} to analyze data, these points can be automatically excluded by specifying the argument \texttt{remove.outlier.sd}). In the example plots, following normalization, mean metabolite abundance values are much more stable across batches in the control samples. In the experimental data, mean abundances are more variable, even after normalization. This is expected, as characteristics of biological interest are not expected to be uniform across batches, and normalization aims to preserve this true biological variability.
 
-#add in threshold of detectability for the last batch and also add a legend to describe the threshold lines
-batch.thresholds5<-11.90
-normalized.control.plot<-normalized.control.plot+geom_segment(aes(x=4.7,y=batch.thresholds5,xend=5.3,yend=batch.thresholds5,linetype="Batch Specific\nThreshold of\nDetectability"),color="purple")+
-										scale_linetype_manual(name="",values=2)+guides(color=guide_legend(order=1),shape=guide_legend(order = 2),linetype=guide_legend(order = 3))
+<<label=fig2, echo=TRUE,include=FALSE>>=
+plot.list<-lapply(ynames, metabplot, batch="batch", raw.obs.data=euMetabData, raw.cont.data=euMetabCData, 
+			norm.obs.data=euMetabNorm$obsNorm, norm.cont.data=euMetabNorm$ctlNorm,
+			 color.var="pheno", cont.outlier.sd.thresh=2, norm.outlier.sd.thresh=4)
 
-#add in annotation for the point below the threshold of detectability 
-normalized.control.plot.final<-normalized.control.plot+geom_text(aes(x=batch,y=Abundance,label="(Unknown\nAbundance)",shape=NULL,group=NULL),color="Red",annotate.df,size=7)+
-					theme(axis.title=element_text(size=35), axis.text=element_text(size=25),  strip.text=element_text(size=30), legend.title=element_text(size=25), legend.text=element_text(size=25))+
-					guides(color=guide_legend(override.aes=list(size=2),order=1, keywidth=0.7, keyheight=0.5,default.unit="inch"), shape=guide_legend(override.aes=list(size=5), order=2,  keywidth=0.7, keyheight=0.5,default.unit="inch"), linetype=guide_legend(order=3),  keywidth=0.7, keyheight=0.5,default.unit="inch")
-normalized.control.plot.final
+#just show plot for one of the metabolites 
+plot.list[[2]]
 @
 
 \begin{figure}[h]
 \begin{center}
-<<label=fig2, fig=TRUE, echo=FALSE, height=10, width=20>>=
+<<label=fig2, fig=TRUE, echo=FALSE, height=4, width=8>>=
 <<fig2>>
-@
-\end{center}
-\end{figure}
-
-In the experimental data, mean metabolite values are more variable, even after normalization. This is expected, as characteristics of biological interest are not expected to be uniform across batches, and normalization aims to preserve this true biological variability. 
-
-<<echo=FALSE,results=hide>>=
-#get experimental data into format suitable for plotting
-exp.data.copy<-euMetabData[,c("batch","pheno","pyruvic_acid","malonic_acid")]
-exp.data.copy$norm_pyruvic_acid<-euMetabNorm$obsNorm[,"pyruvic_acid"]
-exp.data.copy$norm_malonic_acid<-euMetabNorm$obsNorm[,"malonic_acid"]
-revalue(exp.data.copy$pheno,c("MOM"="Mother Experimental","BABY"="Baby Experimental"))->exp.data.copy$pheno
-exp.plot.data<-melt(exp.data.copy,measure.vars=c("pyruvic_acid","malonic_acid","norm_pyruvic_acid","norm_malonic_acid"),variable.name="raw.metab",value.name="Abundance")
-exp.plot.data$Type<-factor(ifelse(exp.plot.data$raw.metab %in% c("pyruvic_acid","malonic_acid"),"Before Normalization","After Normalization"),levels=c("Before Normalization","After Normalization"))
-exp.plot.data$Metabolite<-ifelse(exp.plot.data$raw.metab %in% c("pyruvic_acid","norm_pyruvic_acid"),"Pyruvic Acid","Malonic Acid")
-
-
-#check for missing values in metabolite abundance
-sum(is.na(exp.plot.data$Abundance))
-exp.plot.data[which(is.na(exp.plot.data$Abundance)),]
-
-#for plotting purposes, fill in missing metabolite values with something below the minimum detectable threshold 
-thresholds<-c(10.76,11.51,11.36,10.31,11.90)
-missing.rows<-row.names(exp.plot.data[which(is.na(exp.plot.data$Abundance)),])
-exp.plot.imputed.data<-exp.plot.data
-exp.plot.imputed.data[missing.rows,"Abundance"]<-thresholds[exp.plot.imputed.data[missing.rows,"batch"]]-0.5
-
-#add in annotation of mean values for mother and baby samples 
-mean.annotation<-ddply(exp.plot.data,c("Type","Metabolite","pheno","batch"),summarize,Abundance=mean(Abundance,na.rm=T))
-mean.annotation$point<-"Batch Specific Mean"
-exp.plot.imputed.data$point<-"Observed Data"
-exp.plot.imp.mean.data<-rbind(exp.plot.imputed.data[,c("batch","pheno","Abundance","Type","Metabolite","point")],
-								mean.annotation[,c("batch","pheno","Abundance","Type","Metabolite","point")])
-@								
-
-<<label=fig3, echo=FALSE, include=FALSE>>=
-#beginning of plot, showing observed data and batch specific means connected by line
-exp.plot<-ggplot(exp.plot.imp.mean.data,aes(x=batch,y=Abundance,color=pheno,group=pheno,shape=point,size=point))+
-						geom_point()+scale_shape_manual(name="Point Type",values=c(8,16))+
-						xlab("Analytic Batch")+ylab("Metabolite Abundance")+facet_grid(Metabolite~Type)+geom_line(aes(x=batch,y=Abundance),size=0.5,data=mean.annotation)+
-						scale_size_manual(values=c(7.5,4.5),guide=FALSE)+scale_color_manual(name="Sample Type",values=c( "darkgreen","orange"))					
-						
-#now add in line segments indicating batch specific thresholds of detectability for the first 4 batches
-for (x in 1:4){
-	threshold<-batch.thresholds1.to.4[x]
-	batch.lower<-x-0.3
-	batch.upper<-x+0.3
-	exp.plot<-exp.plot+geom_segment(x=batch.lower,y=threshold,xend=batch.upper,yend=threshold,color="purple",linetype=2,size=0.5)
-}
-
-#add in threshold of detectability for the last batch and also add a legend to describe the threshold lines
-final.exp.plot<-exp.plot+geom_segment(aes(x=4.7,y=batch.thresholds5,xend=5.3,yend=batch.thresholds5,linetype="Batch Specific\nThreshold of\nDetectability"),color="purple",size=0.5)+
-				scale_linetype_manual(name="",values=2)+theme(axis.title=element_text(size=35), axis.text=element_text(size=25),  strip.text=element_text(size=30), legend.title=element_text(size=25), legend.text=element_text(size=25))+
-				guides(color=guide_legend(override.aes=list(size=2),order=1, keywidth=0.7, keyheight=0.5,default.unit="inch"), shape=guide_legend(override.aes=list(size=5), order=2,  keywidth=0.7, keyheight=0.5,default.unit="inch"), linetype=guide_legend(order=3),  keywidth=0.7, keyheight=0.5,default.unit="inch")
-				
-				
-final.exp.plot
-@
-
-\begin{figure}[h]
-\begin{center}
-<<label=fig3, fig=TRUE, height=15, width=20, echo=FALSE>>=
-<<fig3>>
 @
 \end{center}
 \end{figure}
 
 \clearpage
 
-By default, \textit{mixnorm} subtracts the effects of all variables included in the mixture model from the raw data to produce the normalized data. However, in certain instances, it may be desirable to include covariates in the mixture model to accurately estimate batch effects, but not actually remove the effects of those covariates. For instance, in the plots above, mother samples tended to have higher levels of pyruvic acid than baby samples across batches. We can account for sample type (mom vs. baby) in estimating batch effects while preserving metabolite variability based on sample type by specifying the name of the covariate column (or a character vector of names) to optional argument removeCorrection as follows: 
+\section{Function Options}
+
+\subsection{Removing Model Corrections}
+
+By default, \texttt{mixnorm} subtracts the effects of all variables included in the mixture model from the raw data to produce the normalized data. However, in certain instances, it may be desirable to include covariates in the mixture model to accurately estimate batch effects, but not actually remove the effects of those covariates. For instance, in the plots above, mother samples tended to have higher levels of pyruvic acid than baby samples across batches. We can account for sample type (mom vs. baby) in estimating batch effects while preserving metabolite variability based on sample type by specifying the name of the covariate column (or a character vector of names) to optional argument \texttt{removeCorrection} as follows: 
 
 <<>>=
-euMetabNormRC <- mixnorm("pyruvic_acid", batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
+euMetabNormRC <- mixnorm(ynames, batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
 				batchTvals=c(10.76,11.51,11.36,10.31,11.90), cData=euMetabCData,
 				removeCorrection="pheno",data=euMetabData)
 @
 
-The parameter estimates in normParamsZ will be identical to those had removeCorrection not been specified: 
+The parameter estimates in \texttt{normParamsZ} will be identical to those had \texttt{removeCorrection} not been specified: 
 
 <<>>=
-head(euMetabNormRC$normParamsZ)
+euMetabNormRC$normParamsZ[rownames(euMetabNormRC$normParamsZ)=="pyruvic_acid", ]
 @
 
 However, the normalized data will not include a location shift for sample type. As seen below, the differences in pyruvic acid abundance between mother and baby samples are preserved.
 
-<<echo=FALSE, results=hide>>=
-#get experimental data into format suitable for plotting
-exp.data.copy2<-euMetabData[,c("batch","pheno","pyruvic_acid")]
-exp.data.copy2$norm_pyruvic_acid<-euMetabNormRC$obsNorm[,"pyruvic_acid"]
-revalue(exp.data.copy2$pheno,c("MOM"="Mother Experimental","BABY"="Baby Experimental"))->exp.data.copy2$pheno
-exp.plot.data2<-melt(exp.data.copy2,measure.vars=c("pyruvic_acid","norm_pyruvic_acid"),variable.name="raw.metab",value.name="Abundance")
-exp.plot.data2$Type<-factor(ifelse(exp.plot.data2$raw.metab=="pyruvic_acid","Before Normalization","After Normalization"),levels=c("Before Normalization","After Normalization"))
-
-#check for missing values in metabolite abundance
-sum(is.na(exp.plot.data2$Abundance))
-exp.plot.data2[which(is.na(exp.plot.data2$Abundance)),]
-
-#for plotting purposes, fill in missing metabolite values with something below the minimum detectable threshold 
-missing.rows2<-row.names(exp.plot.data2[which(is.na(exp.plot.data2$Abundance)),])
-exp.plot.imputed.data2<-exp.plot.data2
-exp.plot.imputed.data2[missing.rows2,"Abundance"]<-thresholds[exp.plot.imputed.data2[missing.rows2,"batch"]]-0.5
-
-#add in annotation of mean values for mother and baby samples 
-mean.annotation2<-ddply(exp.plot.data2,c("Type","pheno","batch"),summarize,Abundance=mean(Abundance,na.rm=T))
-mean.annotation2$point<-"Batch Specific Mean"
-exp.plot.imputed.data2$point<-"Observed Data"
-exp.plot.imp.mean.data2<-rbind(exp.plot.imputed.data2[,c("batch","pheno","Abundance","Type","point")],
-								mean.annotation2[,c("batch","pheno","Abundance","Type","point")])
-@
-
-<<label=fig4, echo=FALSE, include=FALSE>>=
-#beginning of plot, showing observed data and batch specific means connected by line
-exp.plot2<-ggplot(exp.plot.imp.mean.data2,aes(x=batch,y=Abundance,color=pheno,group=pheno,shape=point,size=point))+
-						geom_point(size=7)+scale_color_discrete(name="Sample Type")+scale_shape_manual(name="Point Type",values=c(8,16))+
-						xlab("Analytic Batch")+ylab("Pyruvic Acid Abundance")+facet_grid(~Type)+geom_line(aes(x=batch,y=Abundance),size=0.5,data=mean.annotation2)+
-						scale_size_manual(values=c(10,4.5),guide=FALSE)+scale_color_manual(name="Sample Type",values=c( "darkgreen","orange"))
-						
-						
-#now add in line segments indicating batch specific thresholds of detectability for the first 4 batches
-for (x in 1:4){
-	threshold<-batch.thresholds1.to.4[x]
-	batch.lower<-x-0.3
-	batch.upper<-x+0.3
-	exp.plot2<-exp.plot2+geom_segment(x=batch.lower,y=threshold,xend=batch.upper,yend=threshold,color="purple",linetype=2,size=0.5)
-}
-
-#add in threshold of detectability for the last batch and also add a legend to describe the threshold lines
-final.exp.plot2<-exp.plot2+geom_segment(aes(x=4.7,y=batch.thresholds5,xend=5.3,yend=batch.thresholds5,linetype="Batch Specific\nThreshold of\nDetectability"),color="purple",size=0.5)+
-				scale_linetype_manual(name="",values=2)+theme(axis.title=element_text(size=35), axis.text=element_text(size=25),  strip.text=element_text(size=30), legend.title=element_text(size=25), legend.text=element_text(size=25))+
-				guides(color=guide_legend(override.aes=list(size=2),order=1, keywidth=0.7, keyheight=0.5,default.unit="inch"), shape=guide_legend(override.aes=list(size=5), order=2,  keywidth=0.7, keyheight=0.5,default.unit="inch"), linetype=guide_legend(order=3),  keywidth=0.7, keyheight=0.5,default.unit="inch")
-final.exp.plot2
+<<label=fig4, echo=TRUE, include=FALSE>>=
+metabplot("pyruvic_acid",  batch="batch", raw.obs.data=euMetabData, raw.cont.data=euMetabCData, 
+		norm.obs.data=euMetabNormRC$obsNorm, norm.cont.data=euMetabNormRC$ctlNorm, 
+		color.var="pheno", cont.outlier.sd.thresh=2, norm.outlier.sd.thresh=4)
 @
 
 \begin{figure}[h]
 \begin{center}
-<<label=fig4, fig=TRUE, height=10, width=20, echo=FALSE>>=
+<<label=fig4, fig=TRUE, height=4, width=8, echo=FALSE>>=
 <<fig4>>
+@
+\end{center}
+\end{figure}
+
+\clearpage
+
+\subsection{Changing Outlier Criteria}
+
+Users may wish to change outlier criteria when executing normalization. In our experience, with only a small number of quality control samples per batch, an outlying sample may unduly influence mixture model results, yielding extreme batch effect estimates and poor normalization results. However, if users wish to not exclude data in estimating technical artifacts, they may do so by setting the \texttt{qc.sd.outliers} argument in \texttt{mixnorm} to Inf. 
+
+<<>>=
+norm.with.outliers <- mixnorm(ynames, batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
+				batchTvals=c(10.76,11.51,11.36,10.31,11.90), cData=euMetabCData,
+				data=euMetabData, qc.sd.outliers=Inf)
+@
+<<label=fig5, echo=TRUE, include=FALSE>>=
+metabplot("malonic_acid",  batch="batch", raw.obs.data=euMetabData, raw.cont.data=euMetabCData, 
+		norm.obs.data=norm.with.outliers$obsNorm, norm.cont.data=norm.with.outliers$ctlNorm, 
+		color.var="pheno", cont.outlier.sd.thresh=Inf, norm.outlier.sd.thresh=4)
+@
+
+\begin{figure}[h]
+\begin{center}
+<<label=fig5, fig=TRUE, height=4, width=8, echo=FALSE>>=
+<<fig5>>
+@
+\end{center}
+\end{figure}
+
+\clearpage
+
+\subsection{Missing Batch Data}
+
+Users may encounter situations where quality control data are entirely missing for one or more batches. In these cases, the batch effect cannot be estimated. 
+
+<<>>=
+cData.missing.batch<-euMetabCData
+cData.missing.batch[cData.missing.batch$batch==2, "malonic_acid"]<-NA				
+norm.with.missing.batch <- mixnorm(ynames, batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
+				batchTvals=c(10.76,11.51,11.36,10.31,11.90), cData=cData.missing.batch,
+				data=euMetabData)	
+@
+
+These cases can be identified in several ways. First, in the \texttt{normParamsZ} output, the relevant batch effect will appear as NA. 
+
+<<>>=
+norm.with.missing.batch$normParamsZ[rownames(norm.with.missing.batch$normParamsZ)=="malonic_acid", ]
+@
+
+Second, in the \texttt{conv} output, the missing batch will be identified in column \texttt{predictors\char`_missing\char`_levels}. Note that if this column is not present in the \texttt{conv} output, then there were no such instances. 
+
+<<>>=
+norm.with.missing.batch$conv
+@	
+
+Last, the missing data will be evident in output plots. Importantly, if quality control data are completely absent for a batch, in the \texttt{mixnorm} output, all non-missing values in the experimental data for that batch will be set to Inf, since normalization could not be performed for those observations. The missing batch data will therefore be evident in the quality control plots as well as the normalized experimental data plot. 
+
+<<label=fig6, echo=TRUE, include=FALSE>>=
+metabplot("malonic_acid",  batch="batch", raw.obs.data=euMetabData, raw.cont.data=cData.missing.batch,
+		 norm.obs.data=norm.with.missing.batch$obsNorm, 
+		 norm.cont.data=norm.with.missing.batch$ctlNorm,  color.var="pheno")
+@			
+
+\begin{figure}[h]
+\begin{center}
+<<label=fig6, fig=TRUE, height=4, width=8, echo=FALSE>>=
+<<fig6>>
+@
+\end{center}
+\end{figure}
+
+\clearpage
+			
+\subsection{Missing Phenotype Data}			
+
+In the example above, a multi-level factor predictor (batch) had entirely missing metabolite data for one batch, but still had data present for at least two other batches. Batch effects could therefore be estimated for those with sufficient data. However, there may be times that categorical mixture model predictors are missing too much metabolite data to be included in the model at all. For instance, in previous examples, \texttt{pheno} has been used as a predictor. This variable takes on one of two values and indicates whether a particular sample was obtained from a mother or baby. If quality control metabolite data were completely missing for either the mothers or the babies, we would be unable to obtain an estimate for the effect of \texttt{pheno} on metabolite abundance. In these situations, when predictors with completely inestimable effects are included in the mixture model, \texttt{mixnorm} does not output any data. Note these instances are also identified in the \texttt{conv} output of \texttt{mixnorm} in column \texttt{excluded\char`_predictors}. Again, if this column is not present in the output, then these types of variables were not present.  If users wish to normalize these metabolites, they must re-run the model excluding the appropriate predictor variable. If doing so, \texttt{batchTvals} should be manually specified such that batch specific thresholds of detectability match those of the full set of metabolites. 
+
+<<>>=
+cData.missing.pheno<-euMetabCData
+cData.missing.pheno[cData.missing.pheno$pheno=="BABY", "malonic_acid"]<-NA				
+norm.missing.pheno <- mixnorm(ynames, batch="batch", mxtrModel=~pheno+batch|pheno+batch, 
+				batchTvals=c(10.76,11.51,11.36,10.31,11.90), cData=cData.missing.pheno,
+				data=euMetabData)	
+
+norm.missing.pheno$normParamsZ[rownames(norm.missing.pheno$normParamsZ)=="malonic_acid", ]
+norm.missing.pheno$conv
+
+@
+
+<<label=fig7, echo=TRUE, include=FALSE>>=
+metabplot("malonic_acid",  batch="batch", raw.obs.data=euMetabData, raw.cont.data=cData.missing.pheno, 
+		norm.obs.data=norm.missing.pheno$obsNorm, norm.cont.data=norm.missing.pheno$ctlNorm,
+		 color.var="pheno")
+@			
+
+\begin{figure}[h]
+\begin{center}
+<<label=fig7, fig=TRUE, height=4, width=8, echo=FALSE>>=
+<<fig7>>
 @
 \end{center}
 \end{figure}
