@@ -8,6 +8,8 @@ import(ggplot2)
 import(plyr)
 importFrom(multtest, mt.rawp2adjp)
 importFrom(BiocParallel, bplapply)
+importFrom("stats", "as.formula", "coef", "dnorm", "formula",
+             "model.matrix", "na.pass", "pchisq", "pnorm", "sd", "terms")
 
 exportMethods(yvals)
 exportMethods(zdesign)
