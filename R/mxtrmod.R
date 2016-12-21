@@ -81,7 +81,7 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
   names(cat.var.levels)<-cat.vars
   
   #loop over input metabolites 
-  results.list<-bplapply(ynames, function(var.name){
+  results.list<-bplapply(ynames, function(var.name, data, model.vars, remove.outlier.sd, cat.vars, minProp, mxtrModel, fullModel, Tvals, nNA, method){
 	
 	#subset the data to just the metabolite and predictor variables 
 	data<-data[ , c(var.name, model.vars)]
@@ -227,7 +227,7 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
 		
 		} else {
 		
-			warning(paste("There is not enough data to run the mixutre model for", ynames))
+			warning(paste("There is not enough data to run the mixture model for", ynames))
 			return(NULL)
 		
 		}
@@ -262,7 +262,8 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
   
 	return(mixmod.results)
   
-  })
+  }, data=data, model.vars=model.vars, remove.outlier.sd=remove.outlier.sd, cat.vars=cat.vars, minProp=minProp, mxtrModel=mxtrModel, fullModel=fullModel, 
+     Tvals=Tvals, nNA=nNA, method=method)
   
   #put together final results table 
   final.result<-rbind.fill(results.list)  
