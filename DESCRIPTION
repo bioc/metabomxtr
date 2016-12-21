@@ -2,8 +2,8 @@ Package: metabomxtr
 Type: Package
 Title: A package to run mixture models for truncated metabolomics data
         with normal or lognormal distributions
-Version: 1.9.2
-Date: 2016-12-19
+Version: 1.9.3
+Date: 2016-12-21
 Author: Michael Nodzenski, Anna Reisetter, Denise Scholtens
 Maintainer: Michael Nodzenski <michael.nodzenski@northwestern.edu>
 Depends: methods,Biobase
