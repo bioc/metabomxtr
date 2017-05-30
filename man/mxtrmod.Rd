@@ -44,6 +44,7 @@ The maximum number of standard deviations from the mean that should be considere
 }
 \references{
 Moulton LH, Halsey NA. A mixture model with detection limits for regression analyses of antibody response to vaccine. Biometrics. 1995 Dec;51(4):1570-8.
+Nodzenski M, Muehlbauer MJ, Bain JR, Reisetter AC, Lowe WL Jr, Scholtens DM. Metabomxtr: an R package for mixture-model analysis of non-targeted metabolomics data. Bioinformatics. 2014 Nov 15;30(22):3287-8.
 }
 \author{
 Michael Nodzenski, Anna Reisetter, Denise Scholtens

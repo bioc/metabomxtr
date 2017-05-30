@@ -12,8 +12,8 @@ The functions in this package return optimized parameter estimates and negative 
 \tabular{ll}{
 Package: \tab metabomxtr\cr
 Type: \tab Package\cr
-Version: \tab 1.9.3\cr
-Date: \tab 2016-12-21\cr
+Version: \tab 1.11.1\cr
+Date: \tab 2017-05-30\cr
 License: \tab GPL-2\cr
 }
 The function mxtrmodLL calculates the negative log-likelihood of mixture models. The function mxtrmodstart returns starting parameter estimates to be used when optimizing the mixture model parameters. The function mxtrmod returns optimized mixture model parameter estimates and the negative log-likelihood of the model. The function mxtrmodLRT performs likelihood ratio tests of full vs. reduced mixture models. The function mixnorm performs per-metabolite batch normalization using a mixture model with batch-specific thresholds and run order correction if desired.
@@ -25,6 +25,8 @@ Maintainer: Michael Nodzenski <michael.nodzenski@northwestern.edu>
 }
 \references{
 Moulton LH, Halsey NA. A mixture model with detection limits for regression analyses of antibody response to vaccine. Biometrics. 1995 Dec;51(4):1570-8.
+Nodzenski M, Muehlbauer MJ, Bain JR, Reisetter AC, Lowe WL Jr, Scholtens DM. Metabomxtr: an R package for mixture-model analysis of non-targeted metabolomics data. Bioinformatics. 2014 Nov 15;30(22):3287-8.
+Reisetter AC, Muehlbauer MJ, Bain JR, Nodzenski M, Stevens RD, Ilkayeva O, Metzger BE, Newgard CB, Lowe WL Jr, Scholtens DM. Mixture model normalization for non-targeted gas chromatography/mass spectrometry metabolomics data. BMC Bioinformatics. 2017 Feb 2;18(1):84.
 }
 
 \keyword{ package }
