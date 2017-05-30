@@ -294,13 +294,13 @@ mixnorm <- function(ynames, batch="Batch", mxtrModel=NULL, cData, data, batchTva
 		
 				for (row.num in 1:nrow(unique.cat.combns)){
 				
-					combn.test<-merge(cData[ , c(metab, cat.vars)], unique.cat.combns[row.num, ], by=cat.vars)
+					combn.test<-merge(cData[ , c(metab, cat.vars)], unique.cat.combns[row.num, , drop =F], by=cat.vars)
 					combn.test.target<-combn.test[!is.na(combn.test[ , metab]) & !is.infinite(combn.test[ , metab]), ]
 					if (nrow(combn.test.target)==0){
 					
 						data.copy<-data
 						data.copy$row.number<-1:nrow(data.copy)
-						remove.row.df<-merge(data.copy[ ,c(metab, cat.vars, "row.number")], unique.cat.combns[row.num, ], by=cat.vars)
+						remove.row.df<-merge(data.copy[ ,c(metab, cat.vars, "row.number")], unique.cat.combns[row.num, , drop = F], by=cat.vars)
 						remove.row.df<-remove.row.df[!is.na(remove.row.df[ , metab]), ]
 						problem.rows<-remove.row.df$row.number
 						

@@ -84,7 +84,7 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
   results.list<-bplapply(ynames, function(var.name, data, model.vars, remove.outlier.sd, cat.vars, minProp, mxtrModel, fullModel, Tvals, nNA, method){
 	
 	#subset the data to just the metabolite and predictor variables 
-	data<-data[ , c(var.name, model.vars)]
+	data<-data[ , c(var.name, model.vars), drop = F]
 
 	#if requested, remove outlying values
 	metab.vec<-data[ , var.name]
@@ -96,17 +96,26 @@ mxtrmod <-function(ynames,mxtrModel,Tvals=NULL,nNA=5,minProp=0.2,method="BFGS",d
 		remove.these.rows<- !is.na(metab.vec) & !is.infinite(metab.vec) & 
 								(metab.vec > mean.metab.abundance + remove.outlier.sd*sd.metab.abundance |  metab.vec < mean.metab.abundance - remove.outlier.sd*sd.metab.abundance)
 		metab.vec<-metab.vec[!remove.these.rows]
-		data<-data[!remove.these.rows, ]
+		data<-data[!remove.these.rows, , drop = F]
 		
 	}	
 	
 	#determine whether any of the levels of categorical variables are entirely missing
-	missing.levels.check<-lapply(var.name, anyMissingLevels, cat.vars=cat.vars, dataset=data)
-	names(missing.levels.check)<-var.name
-	any.missing.levels<-sapply(missing.levels.check, any)
-	missing.level.vars<-names(any.missing.levels)[any.missing.levels]
-	no.missing.level.vars<-names(any.missing.levels)[!any.missing.levels]
-   
+	if (length(cat.vars) > 0){
+	
+		missing.levels.check<-lapply(var.name, anyMissingLevels, cat.vars=cat.vars, dataset=data)
+		names(missing.levels.check)<-var.name
+		any.missing.levels<-sapply(missing.levels.check, any)
+		missing.level.vars<-names(any.missing.levels)[any.missing.levels]
+		no.missing.level.vars<-names(any.missing.levels)[!any.missing.levels]
+	
+	} else {
+	
+		missing.level.vars <- NULL
+		no.missing.level.vars <- var.name
+	
+	}
+	
 	#if there are any variables entirely missing for at least one level of the categorical variables, 
 	#remove those levels from the data and run a mixture model
 	if (var.name %in% missing.level.vars){
