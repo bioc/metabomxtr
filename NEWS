@@ -1,3 +1,19 @@
+changes in version 1.11.1
+	*corrected bugs that occur when mixture models include at most 1 predictor
+	
+changes in version 1.9.1
+	*modified package so that normalization function does not output data 
+	when any model parameters are not possible to estimate. 
+	
+	*added function metabPlot to plot pre vs. post normalization 
+	metabolite abundances. 
+	
+	*updated mixnorm vignette
+
+changes in version 1.7.3
+	*modified package functions to handle situations where metabolites are entirely 
+	 missing for all levels of a categorical predictor in the mixture model.
+	 
 changes in version 1.7.1
 	*modified package functions to handle situations where metabolites are entirely 
 	 missing for a particular level of a categorical predictor in the mixture model.

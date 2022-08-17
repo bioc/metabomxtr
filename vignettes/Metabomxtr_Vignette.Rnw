@@ -82,7 +82,13 @@ table(metabdata$PHENO)
 fullModel<-~PHENO|PHENO+age_ogtt_mc+ga_ogtt_wks_mc+storageTimesYears_mc+parity12
 @
 
-The \textit{mxtrmod} function can then be used to run the full model on each of the 4 metabolites of interest. 
+In addition, we need to specify a reduced model. Because our goal is to evaluate the significance of the contribution of phenotype to \textit{both} the continuous and discrete portions of the mixture model, we'll remove PHENO from both portions. 
+
+<<>>=
+reducedModel<-~1|age_ogtt_mc+ga_ogtt_wks_mc+storageTimesYears_mc+parity12
+@ 
+
+The \textit{mxtrmod} function can be used to run the full model on each of the 4 metabolites of interest. 
 
 <<>>=
 fullModelResults<-mxtrmod(ynames=yvars,mxtrModel=fullModel,data=metabdata)
@@ -93,13 +99,7 @@ In the output data frame, the .id column indicates metabolite, columns beginning
 
 \vspace{10pt}
 
-After running the full model, we need to specify a reduced model. Because our goal is to evaluate the significance of the contribution of phenotype to \textit{both} the continuous and discrete portions of the mixture model, we'll remove PHENO from both portions. 
-
-<<>>=
-reducedModel<-~1|age_ogtt_mc+ga_ogtt_wks_mc+storageTimesYears_mc+parity12
-@ 
-
-Then, we'll use \textit{mxtrmod} to run the reduced models. Users should note the importance of specifying the \textit{fullModel} parameter when running reduced models, which ensures that if model covariates have missing values, both full and reduced model results are based on the same set of observations. 
+Then, we will use \textit{mxtrmod} to run the reduced models. Users should note the importance of specifying the \textit{fullModel} parameter when running reduced models, which ensures that if model covariates have missing values, both full and reduced model results are based on the same set of observations. 
 
 <<>>=
 reducedModelResults<-mxtrmod(ynames=yvars,mxtrModel=reducedModel,data=metabdata,fullModel=fullModel)

@@ -1,6 +1,22 @@
-#This function determines whether any level of a categorical variable has entirely missing values  
-
 anyMissingLevels<-function(yname, cat.vars, dataset){
+
+  ##############################################################
+  #This function determines whether any level of a categorical 
+  #variable in the mixture model has entirely missing metabolite
+  #values.  
+  #
+  #Args:
+  #	yname: A character string corresponding to the metabolite column 
+  #		   name. 
+  #	cat.vars: a character vector of the names of categorical 
+  #			  variables in the mixture model 
+  # dataset: a data frame containing metabolite levels and 
+  #			 categorical predictors 
+  #
+  #Returns:
+  #	A logical vector indicating whether each categorical variable 
+  # has at least one level with entirely missing metabolite data 
+  ####################################################################
 
   #first, start by removing rows that have all missing outcome values
   yname.vec<-dataset[ , yname]

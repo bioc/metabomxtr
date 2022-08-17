@@ -4,8 +4,12 @@ import(optimx)
 import(Formula)
 import(methods)
 import(Biobase)
-importFrom(plyr, ldply, rbind.fill)
+import(ggplot2)
+import(plyr)
 importFrom(multtest, mt.rawp2adjp)
+importFrom(BiocParallel, bplapply)
+importFrom("stats", "as.formula", "coef", "dnorm", "formula",
+             "model.matrix", "na.pass", "pchisq", "pnorm", "sd", "terms")
 
 exportMethods(yvals)
 exportMethods(zdesign)

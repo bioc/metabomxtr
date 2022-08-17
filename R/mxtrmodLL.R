@@ -39,8 +39,12 @@ function(params,obsY,xVars,zVars,Tvals,includeDiscrete){
   ZprimeBeta <- as.vector(zVars %*% betaVec)
 
   theseObs <- which(obsInd==1)
-  ans1 <- sum(log(dnorm(obsY[theseObs],mean=ZprimeBeta[theseObs],
-                         sd=sigma)))
+  
+  #suppressing warnings for the dnorm and pnorm functions 
+  #because these give warnings about NANs produced, which 
+  #are expected and can be ignored 
+  ans1 <- suppressWarnings(sum(log(dnorm(obsY[theseObs],mean=ZprimeBeta[theseObs],
+                         sd=sigma))))
 
   #Take the negative of the log likelihood because the optimization 
   #function (optimx) finds a minimum. 
@@ -80,16 +84,16 @@ function(params,obsY,xVars,zVars,Tvals,includeDiscrete){
   part1 <- sum(-log(1+exp(XprimeAlpha)))
 
   #part 2
-  cdfPart <- pnorm(Tvals,mean=ZprimeBeta,sd=sigma)
-  part2 <- sum((1-obsInd) * log(1+exp(XprimeAlpha)*cdfPart))
+  cdfPart <- suppressWarnings(pnorm(Tvals,mean=ZprimeBeta,sd=sigma))
+  part2 <- suppressWarnings(sum((1-obsInd) * log(1+exp(XprimeAlpha)*cdfPart)))
   
   #part 3
   part3 <- sum(obsInd*XprimeAlpha)
 
   #part 4
   theseObs <- which(obsInd==1)
-  part4 <- sum(log(dnorm(obsY[theseObs],mean=ZprimeBeta[theseObs],
-                         sd=sigma)))
+  part4 <- suppressWarnings(sum(log(dnorm(obsY[theseObs],mean=ZprimeBeta[theseObs],
+                         sd=sigma))))
   
   ans1 <- part1+part2+part3+part4
 

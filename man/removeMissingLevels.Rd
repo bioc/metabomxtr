@@ -7,12 +7,9 @@ A function to remove levels of categorical variables with completely missing out
 This function removes levels of categorical variables with completely missing outcome data from data frames or matrices. 
 }
 \usage{
-removeMissingLevels( yname,  missing.levels.list,  dataset)
+removeMissingLevels(missing.levels.list,  dataset)
 }
 \arguments{
-  \item{yname}{
-A character string indicating the outcome variable, i.e., a metabolite.
-}
   \item{missing.levels.list}{
 A list, output by function idMissingLevels, containing the specific levels of categorical variables that are missing all outcome data. 
 }
@@ -46,7 +43,7 @@ missing.levels.check
 missing.levels<-idMissingLevels( "aspartic_acid", missing.levels.check, example.data)
 
 #remove the missing level 
-cleaned.data<-removeMissingLevels("aspartic_acid", missing.levels, example.data)
+cleaned.data<-removeMissingLevels(missing.levels, example.data)
 
 
 }
